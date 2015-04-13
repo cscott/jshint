@@ -30,7 +30,16 @@ module.exports = function(target, done) {
 
     wrapped = [ "/*! " + version + " */",
       "var JSHINT;",
-      "if (typeof window === 'undefined') window = {};",
+      "if (typeof java !== 'undefined' &&",
+      "    typeof java.lang !== 'undefined' &&",
+      "    typeof java.lang.System !== 'undefined') {",
+      "  // rhino environment detected",
+      "  if (typeof global !== 'object' && typeof self === 'undefined' && typeof window === 'undefined') {",
+      "    global = this;",
+      "  }",
+      "} else if (typeof window === 'undefined') {",
+      "  window = {};",
+      "}",
       "(function () {",
         "var require;",
         src,
@@ -40,7 +49,7 @@ module.exports = function(target, done) {
     ];
 
     if (target === "rhino") {
-      wrapped.splice(0, 0, "#!/usr/bin/env rhino", "var window = {};");
+      wrapped.splice(0, 0, "#!/usr/bin/env rhino");
     }
 
     done(null, version, wrapped.join("\n"));
